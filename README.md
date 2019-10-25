@@ -13,16 +13,16 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Installation
 
-CoreDataStore is available through [CocoaPods](https://cocoapods.org). To install
+CoreDataStore currently is not available through [CocoaPods](https://cocoapods.org) public repo. To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'CoreDataStore'
+pod 'CoreDataStore', :inhibit_warnings => true, :git => 'git://github.com/Koshub/CoreDataStore.git', :branch => 'master'
 ```
 
 ## Author
 
-Kostiantyn Herasimov, herasimovkostiantyn@gmail.com
+KosHub
 
 ## License
 
