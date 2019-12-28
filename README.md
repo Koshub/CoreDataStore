@@ -1,6 +1,6 @@
 # CoreDataStore
 
-[![CI Status](https://img.shields.io/travis/KosHub/CoreDataStore.svg?style=flat)](https://travis-ci.org/KosHubCoreDataStore)
+[![CI Status](https://img.shields.io/travis/Koshub/CoreDataStore.svg?style=flat)](https://travis-ci.org/Koshub/CoreDataStore)
 [![Version](https://img.shields.io/cocoapods/v/CoreDataStore.svg?style=flat)](https://cocoapods.org/pods/CoreDataStore)
 [![License](https://img.shields.io/cocoapods/l/CoreDataStore.svg?style=flat)](https://cocoapods.org/pods/CoreDataStore)
 [![Platform](https://img.shields.io/cocoapods/p/CoreDataStore.svg?style=flat)](https://cocoapods.org/pods/CoreDataStore)
@@ -22,7 +22,7 @@ pod 'CoreDataStore', :inhibit_warnings => true, :git => 'git://github.com/Koshub
 
 ## Author
 
-KosHub
+Koshub
 
 ## License
 

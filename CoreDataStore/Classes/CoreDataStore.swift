@@ -43,7 +43,7 @@ public final class CoreDataStore {
     private(set) var modelURL: URL
     private(set) var storeType: StoreType
     private let containerName = "Model"
-    private(set) var state: State = .notInitialized
+    public private(set) var state: State = .notInitialized
     
     fileprivate var coordinator: NSPersistentStoreCoordinator?
     fileprivate var model: NSManagedObjectModel?
