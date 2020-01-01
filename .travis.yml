@@ -7,7 +7,7 @@ language: objective-c
 cache: cocoapods
 podfile: Example/Podfile
 before_install:
-  - gem install cocoapods --no-rdoc --no-ri --no-document --quiet
+  - gem install cocoapods --no-document
   - pod install --project-directory=Example
   #- carthage build --no-skip-current
   #- swift package clean && swift build && swift test  
