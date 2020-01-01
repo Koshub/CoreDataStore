@@ -17,7 +17,7 @@ CoreDataStore currently is not available through [CocoaPods](https://cocoapods.o
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'CoreDataStore', :inhibit_warnings => true, :git => 'git://github.com/Koshub/CoreDataStore.git', :branch => 'master'
+pod 'CoreDataStore'
 ```
 
 ## Author
