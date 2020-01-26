@@ -7,10 +7,8 @@
 
 import Foundation
 
-#if os(iOS)
-#if os(macOS)
-
-//#if canImport(CoreData)
+#if os(iOS) || os(macOS)
+#if canImport(CoreData)
 import CoreData
 
 
@@ -298,4 +296,3 @@ public extension NSManagedObject {
 
 #endif
 #endif
-//#endif

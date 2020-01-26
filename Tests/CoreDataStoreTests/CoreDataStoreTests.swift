@@ -2,9 +2,7 @@ import XCTest
 
 @testable import CoreDataStore
 
-#if os(iOS)
-#if os(macOS)
-
+#if os(iOS) || os(macOS)
 #if canImport(CoreData)
 import CoreData
 final class CoreDataStoreTests: XCTestCase {
@@ -34,7 +32,5 @@ final class CoreDataStoreTests: XCTestCase {
         ("testExample", testExample),
     ]
 }
-
-#endif
 #endif
 #endif
