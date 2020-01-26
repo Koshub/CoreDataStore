@@ -16,7 +16,7 @@ final class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+    
         guard let modelURL = CoreDataStore.defaultModelURL() else { return }
         guard let storeURL = CoreDataStore.defaultStoreURL() else { return }
         
@@ -51,6 +51,7 @@ final class ViewController: UIViewController {
             default: break
             }
         }
+ */
     }
 
     override func didReceiveMemoryWarning() {

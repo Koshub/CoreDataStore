@@ -48,7 +48,7 @@
 		678B004DF2C3B304DC27BEA4 /* Pods-CoreDataStore_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CoreDataStore_Tests.debug.xcconfig"; path = "Target Support Files/Pods-CoreDataStore_Tests/Pods-CoreDataStore_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		6B70AC22656BFA2FCD9C0A12 /* Pods-CoreDataStore_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CoreDataStore_Tests.release.xcconfig"; path = "Target Support Files/Pods-CoreDataStore_Tests/Pods-CoreDataStore_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		96F3D38B23633456003E69CA /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
-		CE14F2140331F6F3CE5FB963 /* CoreDataStore.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CoreDataStore.podspec; path = ../CoreDataStore.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		CE14F2140331F6F3CE5FB963 /* CoreDataStore.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CoreDataStore.podspec; path = ../CoreDataStore.podspec; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,10 +215,12 @@
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = ND4CWHWW83;
 						LastSwiftMigration = 1020;
 					};
 					607FACE41AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = ND4CWHWW83;
 						LastSwiftMigration = 1020;
 						TestTargetID = 607FACCF1AFB9204008FA782;
 					};
@@ -491,6 +493,7 @@
 			baseConfigurationReference = 2A8D6523459E5A46534E7090 /* Pods-CoreDataStore_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = ND4CWHWW83;
 				INFOPLIST_FILE = CoreDataStore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -506,6 +509,7 @@
 			baseConfigurationReference = 61C0CD26E2D23AFB3C985F69 /* Pods-CoreDataStore_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = ND4CWHWW83;
 				INFOPLIST_FILE = CoreDataStore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -520,6 +524,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 678B004DF2C3B304DC27BEA4 /* Pods-CoreDataStore_Tests.debug.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = ND4CWHWW83;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -541,6 +546,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6B70AC22656BFA2FCD9C0A12 /* Pods-CoreDataStore_Tests.release.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = ND4CWHWW83;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 					"$(inherited)",

@@ -6,6 +6,11 @@
 //
 
 import Foundation
+
+#if os(iOS)
+#if os(macOS)
+
+//#if canImport(CoreData)
 import CoreData
 
 
@@ -75,13 +80,15 @@ public final class CoreDataStore {
             
             if let model = NSManagedObjectModel(contentsOf: modelURL) {
                 
-                if #available(iOS 10.0, *) {
+                if #available(iOS 10.0, OSX 10.12, *) {
                     
                     let storeDescription = NSPersistentStoreDescription(url: self.storeURL)
                     storeDescription.type = storeType.value
                     storeDescription.shouldMigrateStoreAutomatically = true
                     storeDescription.shouldInferMappingModelAutomatically = true
+                    #if os(iOS)
                     storeDescription.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
+                    #endif
                     let container = NSPersistentContainer(name: containerName, managedObjectModel: model)
                     container.persistentStoreDescriptions = [storeDescription]
                     container.loadPersistentStores { [weak self] (_, error) in
@@ -99,11 +106,20 @@ public final class CoreDataStore {
                         }
                     }
                     
-                } else { // < #available(iOS 10.0, *)
+                } else { // < #available(iOS 10.0, OSX 10.12, *)
                     let coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
                     
                     do {
-                        try coordinator.addPersistentStore(ofType: storeType.value, configurationName: nil, at: self.storeURL, options: [NSMigratePersistentStoresAutomaticallyOption: NSNumber(value: true), NSInferMappingModelAutomaticallyOption: NSNumber(value: true), NSPersistentStoreFileProtectionKey: FileProtectionType.complete as NSObject])
+                        var options: [AnyHashable: Any] = [
+                            NSMigratePersistentStoresAutomaticallyOption: NSNumber(value: true),
+                            NSInferMappingModelAutomaticallyOption: NSNumber(value: true)
+                        ]
+                        
+                        #if os(iOS)
+                        options[NSPersistentStoreFileProtectionKey] = FileProtectionType.complete as NSObject
+                        #endif
+                        
+                        try coordinator.addPersistentStore(ofType: storeType.value, configurationName: nil, at: self.storeURL, options: options)
                         let context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
                         context.persistentStoreCoordinator = coordinator
                         
@@ -272,10 +288,14 @@ public extension NSManagedObject {
     }
     
     class func create<T: NSManagedObject>(context: NSManagedObjectContext) -> T {
-        if #available(iOS 10.0, *) {
+        if #available(iOS 10.0, OSX 10.12,  *) {
             return T(context: context)
         } else {
             return NSEntityDescription.insertNewObject(forEntityName: entityName, into: context) as! T
         }
     }
 }
+
+#endif
+#endif
+//#endif

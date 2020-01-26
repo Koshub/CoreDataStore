@@ -1,9 +1,10 @@
 {
   "name": "CoreDataStore",
-  "version": "0.1.0",
-  "summary": "A short description of CoreDataStore.",
-  "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/Kostiantyn Herasimov/CoreDataStore",
+  "version": "0.1.2",
+  "summary": "CoreData wrapper",
+  "swift_version": "5.0",
+  "description": "Simple CoreData wrapper with transactions support",
+  "homepage": "https://github.com/KosHub/CoreDataStore",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -12,11 +13,12 @@
     "Kostiantyn Herasimov": "herasimovkostiantyn@gmail.com"
   },
   "source": {
-    "git": "https://github.com/Kostiantyn Herasimov/CoreDataStore.git",
-    "tag": "0.1.0"
+    "git": "https://github.com/Koshub/CoreDataStore.git",
+    "tag": "0.1.2"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "10.0"
   },
-  "source_files": "CoreDataStore/Classes/**/*"
+  "source_files": "Sources/CoreDataStore/*.swift",
+  "frameworks": "CoreData"
 }
