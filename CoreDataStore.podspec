@@ -31,7 +31,7 @@ Simple CoreData wrapper with transactions support
 
   s.ios.deployment_target = '10.0'
 
-  s.source_files = 'CoreDataStore/Classes/**/*'
+  s.source_files = 'Sources/CoreDataStore/*.swift'
   
   # s.resource_bundles = {
   #   'CoreDataStore' => ['CoreDataStore/Assets/*.png']
