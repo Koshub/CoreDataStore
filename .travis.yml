@@ -10,7 +10,7 @@ before_install:
   - gem install cocoapods --no-document
   - pod install --project-directory=Example
   #- carthage build --no-skip-current
-  #- swift package clean && swift build && swift test  
+  - swift package clean && swift build && swift test  
 script:
   - set -o pipefail && xcodebuild test -enableCodeCoverage YES -workspace Example/CoreDataStore.xcworkspace -scheme CoreDataStore-Example -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 6,OS=latest' ONLY_ACTIVE_ARCH=NO | xcpretty -c
   - pod spec lint --allow-warnings
