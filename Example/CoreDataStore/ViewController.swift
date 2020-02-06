@@ -30,17 +30,19 @@ final class ViewController: UIViewController {
                 let transaction = store.createTransaction()
                 do {
                     
-                    let request: NSFetchRequest<CDUser> = CDUser.fetchRequest()
-                    let result = try viewContext.fetch(request)
-
-                    for user in result {
-                        print(user)
-                    }
+                    let single = try viewContext.fetch(firstOf: CDUser.self)
+                    print(single)
+                    
+                    let kosUsers = try viewContext.fetch(allOf: CDUser.self, .whereKey("firstName", equalTo: "Kos"))
+                    kosUsers.forEach { print($0) }
+                    
+                    let users = try viewContext.fetch(allOf: CDUser.self)
+                    users.forEach { print($0.firstName) }
                     
                     try transaction.run { (store, context) -> Void in
                         let user = CDUser(context: context)
                         user.id = UUID().uuidString
-                        user.firstName = "Kos"
+                        user.firstName = "Kos \(Int.random(in: 0...100))"
                     }
                     
                     transaction.commit()

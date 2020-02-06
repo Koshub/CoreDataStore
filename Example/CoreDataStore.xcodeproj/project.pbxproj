@@ -48,7 +48,7 @@
 		678B004DF2C3B304DC27BEA4 /* Pods-CoreDataStore_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CoreDataStore_Tests.debug.xcconfig"; path = "Target Support Files/Pods-CoreDataStore_Tests/Pods-CoreDataStore_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		6B70AC22656BFA2FCD9C0A12 /* Pods-CoreDataStore_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CoreDataStore_Tests.release.xcconfig"; path = "Target Support Files/Pods-CoreDataStore_Tests/Pods-CoreDataStore_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		96F3D38B23633456003E69CA /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
-		CE14F2140331F6F3CE5FB963 /* CoreDataStore.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CoreDataStore.podspec; path = ../CoreDataStore.podspec; sourceTree = "<group>"; };
+		CE14F2140331F6F3CE5FB963 /* CoreDataStore.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CoreDataStore.podspec; path = ../CoreDataStore.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

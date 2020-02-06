@@ -7,7 +7,7 @@
 
 import Foundation
 
-#if os(iOS) || os(macOS)
+#if os(iOS) || os(macOS) || targetEnvironment(simulator)
 #if canImport(CoreData)
 import CoreData
 
@@ -291,6 +291,53 @@ public extension NSManagedObject {
         } else {
             return NSEntityDescription.insertNewObject(forEntityName: entityName, into: context) as! T
         }
+    }
+}
+
+
+public extension NSManagedObjectContext {
+    
+    enum FetchRanage {
+        case single
+        case all
+        case range(NSRange)
+    }
+    
+    enum FetchCondition {
+        case `where`(NSPredicate)
+        case `whereKey`(String, equalTo: Any)
+    }
+    
+    func fetch<T: NSManagedObject>(allOf entity: T.Type, _ condition: FetchCondition? = nil, sortedBy sortDescriptors: [NSSortDescriptor]? = nil, range: FetchRanage = .all) throws -> [T] {
+        
+        let request: NSFetchRequest = NSFetchRequest<T>(entityName: entity.entityName)
+        
+        if let condition = condition {
+            switch condition {
+            case .where(let predicate):
+                request.predicate = predicate
+            case .`whereKey`(let key, equalTo: let value):
+                request.predicate = .init(format: "%K == %@", argumentArray: [key, value])
+            }            
+        }
+        
+        request.sortDescriptors = sortDescriptors
+        
+        switch range {
+        case .single:
+            request.fetchLimit = 0
+            request.fetchOffset = 0
+        case .range(let range):
+            request.fetchLimit = range.length
+            request.fetchOffset = range.location
+        case .all: break
+        }
+        
+        return try fetch(request)
+    }
+    
+    func fetch<T: NSManagedObject>(firstOf entity: T.Type, _ condition: FetchCondition? = nil) throws -> T? {
+        return try fetch(allOf: entity, condition, range: .single).first
     }
 }
 
