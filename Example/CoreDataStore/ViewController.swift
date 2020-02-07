@@ -20,9 +20,14 @@ final class ViewController: UIViewController {
         guard let modelURL = CoreDataStore.defaultModelURL() else { return }
         guard let storeURL = CoreDataStore.defaultStoreURL() else { return }
         
-        store = CoreDataStore(modelURL: modelURL, storeType: .sqlite(storeURL: storeURL))
-        guard let store = store else { return }
-        
+        let store = CoreDataStore(
+            modelURL: modelURL,
+            storeType: .sqlite(
+                storeURL: storeURL,
+                fileProtection: .complete
+            )
+        )
+        self.store = store
         store.initialize { (result) in
             switch result {
             case .success:
@@ -33,7 +38,10 @@ final class ViewController: UIViewController {
                     let single = try viewContext.fetch(firstOf: CDUser.self)
                     print(single)
                     
-                    let kosUsers = try viewContext.fetch(allOf: CDUser.self, .whereKey("firstName", equalTo: "Kos"))
+                    let kosUsers = try viewContext.fetch(
+                        allOf: CDUser.self,
+                        .whereKey("firstName", equalTo: "Kos")
+                    )
                     kosUsers.forEach { print($0) }
                     
                     let users = try viewContext.fetch(allOf: CDUser.self)

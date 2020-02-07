@@ -29,7 +29,7 @@ public final class CoreDataStore {
     }
     
     public enum StoreType {
-        case sqlite(storeURL: URL)
+        case sqlite(storeURL: URL, fileProtection: FileProtectionType)
         case memory
         
         var value: String {
@@ -43,6 +43,9 @@ public final class CoreDataStore {
     }
     
     private(set) var storeURL: URL
+    #if os(iOS)
+    private(set) var storeFileProtectionType: FileProtectionType
+    #endif
     private(set) var modelURL: URL
     private(set) var storeType: StoreType
     private let containerName = "Model"
@@ -60,10 +63,16 @@ public final class CoreDataStore {
         self.modelURL = modelURL
         self.storeType = storeType
         switch storeType {
-        case .sqlite(storeURL: let storeURL):
-            self.storeURL = storeURL
+        case .sqlite(storeURL: let url, fileProtection: let protectionType):
+            self.storeURL = url
+            #if os(iOS)
+            self.storeFileProtectionType = protectionType
+            #endif
         case .memory:
             self.storeURL = URL(string: "/dev/null")!
+            #if os(iOS)
+            self.storeFileProtectionType = .none
+            #endif
         }
     }
     
@@ -85,7 +94,7 @@ public final class CoreDataStore {
                     storeDescription.shouldMigrateStoreAutomatically = true
                     storeDescription.shouldInferMappingModelAutomatically = true
                     #if os(iOS)
-                    storeDescription.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
+                    storeDescription.setOption(storeFileProtectionType as NSObject, forKey: NSPersistentStoreFileProtectionKey)
                     #endif
                     let container = NSPersistentContainer(name: containerName, managedObjectModel: model)
                     container.persistentStoreDescriptions = [storeDescription]
@@ -114,7 +123,7 @@ public final class CoreDataStore {
                         ]
                         
                         #if os(iOS)
-                        options[NSPersistentStoreFileProtectionKey] = FileProtectionType.complete as NSObject
+                        options[NSPersistentStoreFileProtectionKey] = storeFileProtectionType as NSObject
                         #endif
                         
                         try coordinator.addPersistentStore(ofType: storeType.value, configurationName: nil, at: self.storeURL, options: options)
