@@ -287,6 +287,7 @@ public extension CoreDataStore {
     }
 }
 
+// MARK: - Managing
 
 public extension NSManagedObject {
     
@@ -306,21 +307,10 @@ public extension NSManagedObject {
 
 public extension NSManagedObjectContext {
     
-    enum FetchRanage {
-        case single
-        case all
-        case range(NSRange)
-    }
-    
-    enum FetchCondition {
-        case `where`(NSPredicate)
-        case `whereKey`(String, equalTo: Any)
-    }
-    
+    @available(*, deprecated, message: "use `StoreRepresentable`")
     func fetch<T: NSManagedObject>(allOf entity: T.Type, _ condition: FetchCondition? = nil, sortedBy sortDescriptors: [NSSortDescriptor]? = nil, range: FetchRanage = .all) throws -> [T] {
         
         let request: NSFetchRequest = NSFetchRequest<T>(entityName: entity.entityName)
-        
         if let condition = condition {
             switch condition {
             case .where(let predicate):
@@ -345,10 +335,182 @@ public extension NSManagedObjectContext {
         return try fetch(request)
     }
     
+    @available(*, deprecated, message: "use `StoreRepresentable`")
     func fetch<T: NSManagedObject>(firstOf entity: T.Type, _ condition: FetchCondition? = nil) throws -> T? {
         return try fetch(allOf: entity, condition, range: .single).first
     }
 }
+
+
+// MARK: - StoreRepresentable
+
+public protocol RepresentationTransformable {
+    
+    associatedtype Representation
+    associatedtype Context
+    
+    static func from(_ representation: Representation, in context: Context) throws -> Self
+    func update(_ representation: Representation, in context: Context) throws
+}
+
+
+public protocol StoreRepresentable: RepresentationTransformable {
+    
+    associatedtype RepresentationRequest
+    
+    static var request: RepresentationRequest { get }
+}
+
+
+public protocol CoreDataStoreRepresentable: StoreRepresentable where Context == NSManagedObjectContext, Representation: NSManagedObject, RepresentationRequest: NSFetchRequest<Representation> {
+}
+
+
+extension CoreDataStoreRepresentable {
+    public static var request: NSFetchRequest<Representation> { return NSFetchRequest<Representation>(entityName: Representation.entityName) }
+}
+
+
+public extension NSManagedObjectContext {
+    
+    func fetch<Entity: CoreDataStoreRepresentable>(_ type: Entity.Type, _ parameters: FetchParameters = .empty) throws -> [Entity] {
+        return try fetch(apply(parameters, to: Entity.request)).map { try Entity.from($0, in: self) }
+    }
+    
+    func fetch<Entity: CoreDataStoreRepresentable & StoreIdentifiable, ID>(_ type: Entity.Type, byID id: ID) throws -> Entity? where ID == Entity.ID {
+        return try fetch(apply(.init(condition: .whereKey(type.identifierKey, equalTo: id), range: .single), to: Entity.request))
+            .map { try Entity.from($0, in: self) }.first
+    }
+    
+    func insert<Entity: CoreDataStoreRepresentable & StoreIdentifiable>(_ entities: [Entity]) throws {
+        for entity in entities {
+            var representation: Entity.Representation
+            if let stored = try fetch(apply(entity.fetchParameters, to: Entity.request)).first {
+                representation = stored
+            } else {
+                representation = Entity.Representation(context: self)
+            }
+            try entity.update(representation, in: self)
+        }
+    }
+    
+    func delete<Entity: CoreDataStoreRepresentable>(_ type: Entity.Type, _ parameters: FetchParameters = .empty) throws {
+        try fetch(apply(parameters, to: Entity.request)).forEach { delete($0) }
+    }
+}
+
+
+// MARK: - StoreIdentifiable
+
+public protocol StoreIdentifiable {
+    associatedtype ID : Hashable
+    var id: Self.ID { get }
+    static var identifierKey: String { get }
+}
+
+
+public extension StoreIdentifiable {
+    var fetchParameters: FetchParameters { .init(condition: condition, range: range, sort: nil) }
+    var condition: FetchCondition { .whereKey(Self.identifierKey, equalTo: id) }
+    var range: FetchRanage { .single }
+}
+
+// MARK: - Fetch Parameter
+
+public struct FetchParameters {
+    
+    public let condition: FetchCondition?
+    public let range: FetchRanage?
+    public let sort: SortOrder?
+    
+    public init(condition: FetchCondition? = nil, range: FetchRanage? = nil, sort: SortOrder? = nil) {
+        self.condition = condition
+        self.range = range
+        self.sort = sort
+    }
+    
+    public static var empty: Self { .init() }
+}
+
+
+public enum FetchCondition {
+    case `where`(NSPredicate)
+    case `whereKey`(String, equalTo: Any)
+}
+
+
+public enum FetchRanage {
+    case single
+    case all
+    case range(NSRange)
+}
+
+
+public enum SortOrder {
+    
+    public enum Order {
+        case ascending
+        case descending
+    }
+    
+    case byDescriptors([NSSortDescriptor])
+    case byKey(String, order: Order)
+}
+
+
+public extension NSManagedObjectContext {
+    
+    @discardableResult
+    func apply<NSFetchRequestResult>(_ parameters: FetchParameters = .empty, to request: NSFetchRequest<NSFetchRequestResult>) -> NSFetchRequest<NSFetchRequestResult> {
+        if let condition = parameters.condition {
+            apply(condition, to: request)
+        }
+        if let range = parameters.range {
+            apply(range, to: request)
+        }
+        if let sort = parameters.sort {
+            apply(sort, to: request)
+        }
+        return request
+    }
+    
+    @discardableResult
+    func apply<NSFetchRequestResult>(_ condition: FetchCondition, to request: NSFetchRequest<NSFetchRequestResult>) -> NSFetchRequest<NSFetchRequestResult> {
+        switch condition {
+        case .where(let predicate):
+            request.predicate = predicate
+        case .`whereKey`(let key, equalTo: let value):
+            request.predicate = .init(format: "%K == %@", argumentArray: [key, value])
+        }
+        return request
+    }
+    
+    @discardableResult
+    func apply<NSFetchRequestResult>(_ range: FetchRanage, to request: NSFetchRequest<NSFetchRequestResult>) -> NSFetchRequest<NSFetchRequestResult> {
+        switch range {
+        case .single:
+            request.fetchLimit = 0
+            request.fetchOffset = 0
+        case .range(let range):
+            request.fetchLimit = range.length
+            request.fetchOffset = range.location
+        case .all: break
+        }
+        return request
+    }
+    
+    @discardableResult
+    func apply<NSFetchRequestResult>(_ sort: SortOrder, to request: NSFetchRequest<NSFetchRequestResult>) -> NSFetchRequest<NSFetchRequestResult> {
+        switch sort {
+        case .byDescriptors(let descriptors):
+            request.sortDescriptors = descriptors
+        case .byKey(let key, order: let order):
+            request.sortDescriptors = [NSSortDescriptor(key: key, ascending: order == .ascending)]
+        }
+        return request
+    }
+}
+
 
 #endif
 #endif

@@ -31,42 +31,47 @@ final class ViewController: UIViewController {
         store.initialize { (result) in
             switch result {
             case .success:
-                guard let viewContext = store.viewContext else { return }
                 let transaction = store.createTransaction()
                 do {
-                    
-                    let single = try viewContext.fetch(firstOf: CDUser.self)
-                    print(single)
-                    
-                    let kosUsers = try viewContext.fetch(
-                        allOf: CDUser.self,
-                        .whereKey("firstName", equalTo: "Kos")
-                    )
-                    kosUsers.forEach { print($0) }
-                    
-                    let users = try viewContext.fetch(allOf: CDUser.self)
-                    users.forEach { print($0.firstName) }
-                    
-                    try transaction.run { (store, context) -> Void in
-                        let user = CDUser(context: context)
-                        user.id = UUID().uuidString
-                        user.firstName = "Kos \(Int.random(in: 0...100))"
+                    try transaction.run { _, context in
+                        
+                        print("Existed: \n \(try context.fetch(User.self))")
+                        try context.delete(User.self)
+                        print("After delete: \n \(try context.fetch(User.self))")
+                        try context.insert([ User(), User(), User(id: "1", firstName: "Special") ])
+                        print("After insert: \n \(try context.fetch(User.self))")
+                        let special = try context.fetch(User.self, byID: "1")
+                        print(String(describing: special))
                     }
-                    
                     transaction.commit()
                 } catch {
                     transaction.rollback()
                 }
-                
             default: break
             }
         }
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
 }
 
+
+struct User {
+    var id = UUID().uuidString
+    var firstName = UUID().uuidString
+}
+
+
+extension User: CoreDataStoreRepresentable, StoreIdentifiable {
+    
+    typealias RepresentationRequest = NSFetchRequest<CDUser>
+    
+    static var identifierKey: String { "id" }
+    
+    static func from(_ representation: CDUser, in context: NSManagedObjectContext) throws -> User {
+        .init(id: representation.id ?? "", firstName: representation.firstName ?? "")
+    }
+    
+    func update(_ representation: CDUser, in context: NSManagedObjectContext) throws {
+        representation.id = id
+        representation.firstName = firstName
+    }
+}

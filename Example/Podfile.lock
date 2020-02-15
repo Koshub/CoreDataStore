@@ -1,5 +1,5 @@
 PODS:
-  - CoreDataStore (0.3.0)
+  - CoreDataStore (0.4.0)
 
 DEPENDENCIES:
   - CoreDataStore (from `../`)
@@ -9,8 +9,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  CoreDataStore: a3518652acd1f8a44baeea1edf98787f668e22a6
+  CoreDataStore: c229ebd3695429ff10d3b189cf2aa500d546a95c
 
 PODFILE CHECKSUM: 1cc71571f2b93aadd9924e9c46ed18b3d39bb88c
 
-COCOAPODS: 1.6.0
+COCOAPODS: 1.8.4

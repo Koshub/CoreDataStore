@@ -1,8 +1,8 @@
 {
   "name": "CoreDataStore",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "summary": "CoreData wrapper",
-  "swift_version": "5.0",
+  "swift_versions": "5.0",
   "description": "Simple CoreData wrapper with transactions support",
   "homepage": "https://github.com/KosHub/CoreDataStore",
   "license": {
@@ -14,11 +14,12 @@
   },
   "source": {
     "git": "https://github.com/Koshub/CoreDataStore.git",
-    "tag": "0.3.0"
+    "tag": "0.4.0"
   },
   "platforms": {
     "ios": "10.0"
   },
   "source_files": "Sources/CoreDataStore/*.swift",
-  "frameworks": "CoreData"
+  "frameworks": "CoreData",
+  "swift_version": "5.0"
 }
