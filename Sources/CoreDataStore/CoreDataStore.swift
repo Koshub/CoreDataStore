@@ -55,13 +55,16 @@ public final class CoreDataStore {
     fileprivate var model: NSManagedObjectModel?
     fileprivate var context: NSManagedObjectContext?
     
+    fileprivate var mergePolicy: NSMergePolicy = .overwrite
+    
     public var viewContext: NSManagedObjectContext? {
         return context
     }
     
-    public init(modelURL: URL, storeType: StoreType = .memory) {
+    public init(modelURL: URL, storeType: StoreType = .memory, mergePolicy: NSMergePolicy = .overwrite) {
         self.modelURL = modelURL
         self.storeType = storeType
+        self.mergePolicy = mergePolicy
         switch storeType {
         case .sqlite(storeURL: let url, fileProtection: let protectionType):
             self.storeURL = url
@@ -107,6 +110,7 @@ public final class CoreDataStore {
                             self.coordinator = container.persistentStoreCoordinator
                             self.model = model
                             self.context = container.viewContext
+                            container.viewContext.mergePolicy = self.mergePolicy
                             
                             self.state = .initialized
                             completion(.success(()))
@@ -129,7 +133,7 @@ public final class CoreDataStore {
                         try coordinator.addPersistentStore(ofType: storeType.value, configurationName: nil, at: self.storeURL, options: options)
                         let context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
                         context.persistentStoreCoordinator = coordinator
-                        
+                        context.mergePolicy = mergePolicy
                         self.coordinator = coordinator
                         self.context = context
                         self.model = model
@@ -150,6 +154,7 @@ public final class CoreDataStore {
     
     public func backgroundContext() -> NSManagedObjectContext {
         let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        context.mergePolicy = mergePolicy
         context.persistentStoreCoordinator = coordinator
         return context
     }
@@ -192,11 +197,12 @@ public extension CoreDataStore {
         private var state: State = .running
         
         
-        public init(store: CoreDataStore, parentContext: NSManagedObjectContext) {
+        public init(store: CoreDataStore, parentContext: NSManagedObjectContext, mergePolicy: NSMergePolicy = .overwrite) {
             self.store = store
             self.parentContext = parentContext
             self.transactionContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
             self.transactionContext.parent = parentContext
+            self.transactionContext.mergePolicy = mergePolicy
         }
         
         deinit {
@@ -283,7 +289,7 @@ public extension CoreDataStore {
     
     func createTransaction(parentContext: NSManagedObjectContext? = nil) -> CoreDataStore.Transaction {
         let context = parentContext ?? backgroundContext()
-        return Transaction(store: self, parentContext: context)
+        return Transaction(store: self, parentContext: context, mergePolicy: mergePolicy)
     }
 }
 
@@ -307,7 +313,6 @@ public extension NSManagedObject {
 
 public extension NSManagedObjectContext {
     
-    @available(*, deprecated, message: "use `StoreRepresentable`")
     func fetch<T: NSManagedObject>(allOf entity: T.Type, _ condition: FetchCondition? = nil, sortedBy sortDescriptors: [NSSortDescriptor]? = nil, range: FetchRanage = .all) throws -> [T] {
         
         let request: NSFetchRequest = NSFetchRequest<T>(entityName: entity.entityName)
@@ -335,7 +340,6 @@ public extension NSManagedObjectContext {
         return try fetch(request)
     }
     
-    @available(*, deprecated, message: "use `StoreRepresentable`")
     func fetch<T: NSManagedObject>(firstOf entity: T.Type, _ condition: FetchCondition? = nil) throws -> T? {
         return try fetch(allOf: entity, condition, range: .single).first
     }
