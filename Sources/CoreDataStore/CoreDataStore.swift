@@ -313,16 +313,11 @@ public extension NSManagedObject {
 
 public extension NSManagedObjectContext {
     
-    func fetch<T: NSManagedObject>(allOf entity: T.Type, _ condition: FetchCondition? = nil, sortedBy sortDescriptors: [NSSortDescriptor]? = nil, range: FetchRanage = .all) throws -> [T] {
+    func fetch<T: NSManagedObject>(allOf entity: T.Type, _ condition: WhereCondition? = nil, sortedBy sortDescriptors: [NSSortDescriptor]? = nil, range: FetchRanage = .all) throws -> [T] {
         
         let request: NSFetchRequest = NSFetchRequest<T>(entityName: entity.entityName)
         if let condition = condition {
-            switch condition {
-            case .where(let predicate):
-                request.predicate = predicate
-            case .`whereKey`(let key, equalTo: let value):
-                request.predicate = .init(format: "%K == %@", argumentArray: [key, value])
-            }            
+            request.predicate = condition.predicate
         }
         
         request.sortDescriptors = sortDescriptors
@@ -340,8 +335,25 @@ public extension NSManagedObjectContext {
         return try fetch(request)
     }
     
-    func fetch<T: NSManagedObject>(firstOf entity: T.Type, _ condition: FetchCondition? = nil) throws -> T? {
+    func fetch<T: NSManagedObject>(firstOf entity: T.Type, _ condition: WhereCondition? = nil) throws -> T? {
         return try fetch(allOf: entity, condition, range: .single).first
+    }
+    
+    @discardableResult
+    func batchDelete<T: NSManagedObject>(_ type: T.Type, _ condition: WhereCondition? = nil) throws -> Int {
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: T.entityName)
+        if let condition = condition {
+            request.predicate = condition.predicate
+        }
+        
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
+        deleteRequest.resultType = .resultTypeObjectIDs
+        let result = try execute(deleteRequest) as? NSBatchDeleteResult
+        let deletedObjectIDList = result?.result as? [NSManagedObjectID] ?? []
+        let changes = [NSDeletedObjectsKey: deletedObjectIDList]
+        NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [self])
+        
+        return deletedObjectIDList.count
     }
 }
 
@@ -382,7 +394,7 @@ public extension NSManagedObjectContext {
     }
     
     func fetch<Entity: CoreDataStoreRepresentable & StoreIdentifiable, ID>(_ type: Entity.Type, byID id: ID) throws -> Entity? where ID == Entity.ID {
-        return try fetch(apply(.init(condition: .whereKey(type.identifierKey, equalTo: id), range: .single), to: Entity.request))
+        return try fetch(apply(.init(condition: .whereProperty(type.identifierKey, equalTo: id), range: .single), to: Entity.request))
             .map { try Entity.from($0, in: self) }.first
     }
     
@@ -401,6 +413,21 @@ public extension NSManagedObjectContext {
     func delete<Entity: CoreDataStoreRepresentable>(_ type: Entity.Type, _ parameters: FetchParameters = .empty) throws {
         try fetch(apply(parameters, to: Entity.request)).forEach { delete($0) }
     }
+    
+    @discardableResult
+    func batchDelete<Entity: CoreDataStoreRepresentable>(_ type: Entity.Type, _ parameters: FetchParameters = .empty) throws -> Int {
+        let fetchRequest = apply(parameters, to: Entity.request)
+        
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest as! NSFetchRequest<NSFetchRequestResult>)
+        deleteRequest.resultType = .resultTypeObjectIDs
+        
+        let result = try execute(deleteRequest) as? NSBatchDeleteResult
+        let deletedObjectIDList = result?.result as? [NSManagedObjectID] ?? []
+        let changes = [NSDeletedObjectsKey: deletedObjectIDList]
+        NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [self])
+        
+        return deletedObjectIDList.count
+    }
 }
 
 
@@ -415,7 +442,7 @@ public protocol StoreIdentifiable {
 
 public extension StoreIdentifiable {
     var fetchParameters: FetchParameters { .init(condition: condition, range: range, sort: nil) }
-    var condition: FetchCondition { .whereKey(Self.identifierKey, equalTo: id) }
+    var condition: WhereCondition { .whereProperty(Self.identifierKey, equalTo: id) }
     var range: FetchRanage { .single }
 }
 
@@ -423,11 +450,11 @@ public extension StoreIdentifiable {
 
 public struct FetchParameters {
     
-    public let condition: FetchCondition?
+    public let condition: WhereCondition?
     public let range: FetchRanage?
     public let sort: SortOrder?
     
-    public init(condition: FetchCondition? = nil, range: FetchRanage? = nil, sort: SortOrder? = nil) {
+    public init(condition: WhereCondition? = nil, range: FetchRanage? = nil, sort: SortOrder? = nil) {
         self.condition = condition
         self.range = range
         self.sort = sort
@@ -437,9 +464,25 @@ public struct FetchParameters {
 }
 
 
-public enum FetchCondition {
+public enum WhereCondition {
     case `where`(NSPredicate)
-    case `whereKey`(String, equalTo: Any)
+    case whereProperty(String, equalTo: Any)
+    case whereIn(Array<Any>, property: String)
+}
+
+
+extension WhereCondition {
+    
+    public var predicate: NSPredicate {
+        switch self {
+        case .where(let predicate):
+            return predicate
+        case let .whereProperty(key, equalTo: value):
+            return .init(format: "%K == %@", argumentArray: [key, value])
+        case let .whereIn(values, property: key):
+            return .init(format: "\(key) IN %@", values)
+        }
+    }
 }
 
 
@@ -479,13 +522,8 @@ public extension NSManagedObjectContext {
     }
     
     @discardableResult
-    func apply<NSFetchRequestResult>(_ condition: FetchCondition, to request: NSFetchRequest<NSFetchRequestResult>) -> NSFetchRequest<NSFetchRequestResult> {
-        switch condition {
-        case .where(let predicate):
-            request.predicate = predicate
-        case .`whereKey`(let key, equalTo: let value):
-            request.predicate = .init(format: "%K == %@", argumentArray: [key, value])
-        }
+    func apply<NSFetchRequestResult>(_ condition: WhereCondition, to request: NSFetchRequest<NSFetchRequestResult>) -> NSFetchRequest<NSFetchRequestResult> {
+        request.predicate = condition.predicate
         return request
     }
     

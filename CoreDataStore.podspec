@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'CoreDataStore'
-  s.version          = '0.5.0'
+  s.version          = '0.5.1'
   s.summary          = 'CoreData wrapper'
   s.swift_version = '5.0'
 
